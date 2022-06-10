@@ -322,8 +322,8 @@ void rst::rasterizer::rasterize_triangle(const Triangle& t, const std::array<Eig
                     Vector3f interpolated_normal= (a * t.normal[0] + b * t.normal[1] + c * t.normal[2]) / (a + b + c);
                     Vector2f interpolated_texcoords= (a * t.tex_coords[0] + b * t.tex_coords[1] + c * t.tex_coords[2]) / (a + b + c);
                     Vector3f interpolated_shadingcoords = (a * view_pos[0] + b * view_pos[0] + c * view_pos[0]) / (a + b + c);
-                    interpolated_texcoords.x() = Climp(0, 1, interpolated_texcoords.x());
-                    interpolated_texcoords.y() = Climp(0, 1, interpolated_texcoords.y());
+                    interpolated_texcoords.x() = Clamp(0, 1, interpolated_texcoords.x());
+                    interpolated_texcoords.y() = Clamp(0, 1, interpolated_texcoords.y());
                     fragment_shader_payload payload(interpolated_color, interpolated_normal.normalized(), interpolated_texcoords, texture ? &*texture : nullptr);
                     payload.view_pos = interpolated_shadingcoords;
                     Vector3f pixel_color = fragment_shader(payload);

@@ -154,10 +154,10 @@ Eigen::Vector3f texture_fragment_shader(const fragment_shader_payload& payload)
     return result_color * 255.f;
 }
 
-#define ClimpV3(min,max,V3) \
-	   V3.x() = Climp(min,max,V3.x());\
-       V3.y() = Climp(min,max,V3.y());\
-       V3.z() = Climp(min,max,V3.z());
+#define ClampV3(min,max,V3) \
+	   V3.x() = Clamp(min,max,V3.x());\
+       V3.y() = Clamp(min,max,V3.y());\
+       V3.z() = Clamp(min,max,V3.z());
 
 Eigen::Vector3f phong_fragment_shader(const fragment_shader_payload& payload)
 {
@@ -263,8 +263,10 @@ Eigen::Vector3f displacement_fragment_shader(const fragment_shader_payload& payl
 
 float h(Texture* tex,float u,float v)
 {
+    u = Clamp(0,1,u);
+    v = Clamp(0, 1, v);
     Vector3f RGB= tex->getColor(u, v);
-
+    
     return RGB.x() * 0.299 + RGB.y() * 0.587 + RGB.z() * 0.114;
 }
 
@@ -309,17 +311,18 @@ Eigen::Vector3f bump_fragment_shader(const fragment_shader_payload& payload)
     Vector3f t(x * y / sqrt(x * x + z * z), sqrt(x * x + z * z), z * y / sqrt(x * x + z * z));
     Vector3f b = n.cross(t);
     Matrix3f TBN;
-    TBN << t.x(),t.y(),t.z(),
-        b.x(), b.y(), b.z(),
-        n.x(), n.y(), n.z();
+    TBN << t.x(),b.x(),n.x(),
+        t.y(), b.y(), n.y(),
+        t.z(), b.z(), n.z();
     float Utexel =1.0f/ payload.texture->width;
     float Vtexel = 1.0f / payload.texture->height;
-    float dU = kh * kn * (h(payload.texture, u + Utexel, v) - h(payload.texture, u, v));
-    float dV = kh * kn * (h(payload.texture, u, v + Vtexel) - h(payload.texture, u, v));
-    Vector3f ln = Vector3f(-dU, -dV, 1);
+    float dU = kh * kn * (h(payload.texture, u + Utexel, v) - h(payload.texture, u- Utexel, v));
+    float dV = kh * kn * (h(payload.texture, u, v + Vtexel) - h(payload.texture, u, v-Vtexel));
+    Vector3f ln = Vector3f(-dU, -dV,1);
     Vector3f nl = TBN * ln;
     nl.normalized();
 
+    //normal = normal + (t* (-dU)) + (b * (-dV));
 
     Eigen::Vector3f result_color = {0, 0, 0};
     result_color = nl;
