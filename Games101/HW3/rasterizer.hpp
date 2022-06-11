@@ -12,9 +12,7 @@
 #include "Triangle.hpp"
 
 using namespace Eigen;
-#define Min(x,y) x>y? y:x
-#define Max(x,y) x<y? y:x
-#define Clamp(min,max,value) Min(Max(min,value),max)
+
 namespace rst
 {
     enum class Buffers
